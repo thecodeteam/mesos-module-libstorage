@@ -1,0 +1,44 @@
+language: c++
+
+script:
+  - make svn
+  - make boost
+  - make boto
+  - make glog
+  - make protobuf
+  - make picojson
+  - make mesos-0.26.0
+  - make mesos-0.27.2
+  - make mesos-0.28.1
+  - make autoconf
+  - make isolator-0.26.0
+  - make isolator-0.27.2
+  - make isolator-0.28.1
+  - make bintray
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gdb
+    - g++-4.8
+    - libapr1-dev
+    - python-protobuf
+    - libaprutil1-dev
+    - libcurl4-nss-dev
+    - p7zip-full
+
+cache:
+  directories:
+    - /tmp/mesos-ubuntu-12.04-deps/.7zs
+
+deploy:
+  - provider: bintray
+    file: bintray-unstable-filtered.json
+    user: $BINTRAY_USER
+    key: $BINTRAY_KEY
+    skip_cleanup: true
+    on:
+      all_branches: true
+      condition: $TRAVIS_TAG =~ ^$ && ($TRAVIS_REPO_SLUG = 'emccode/mesos-module-libstorage' || $IGNORE_REPO_SLUG_CONDITION = true) && ($TRAVIS_BRANCH = master || $IGNORE_BRANCH_CONDITION = true)

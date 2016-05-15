@@ -1,0 +1,12 @@
+{
+  "libraries": [
+    {
+      "file": "/usr/lib/libmesos_libstorage_isolator-0.24.1.so",
+      "modules": [
+        {
+          "name": "com_emccode_mesos_libstorageIsolator",
+        }
+      ]
+    }
+  ]
+}
