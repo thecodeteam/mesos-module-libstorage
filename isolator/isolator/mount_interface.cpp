@@ -23,7 +23,7 @@
 #include "common/status_utils.hpp"
 
 #include "slave/containerizer/mesos/isolators/docker/volume/MountManager.hpp"
-#include "../libstor-c.h"
+#include "libstor-c.h"
 
 namespace io = process::io;
 

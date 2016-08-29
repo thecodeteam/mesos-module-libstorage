@@ -36,8 +36,13 @@ AM_LIBS = $(PTHREAD_LIBS)
 # Add top-level include dir to our include path.
 MESOS_CPPFLAGS += -I$(top_srcdir)/include
 
+# Add libstorage include dir to our include path.
+LIBSTORAGE_CPPFLAGS = -I/go/pkg/linux_amd64/github.com/emccode/libstorage/c
+LIBSTORAGE_CPPFLAGS += -L/go/pkg/linux_amd64/github.com/emccode/libstorage/c
+LIBSTORAGE_CPPFLAGS += -llibstor-c
+
 # Setup CPPFLAGS that are used for most source files.
-AM_CPPFLAGS = $(MESOS_CPPFLAGS) -Wall -Werror
+AM_CPPFLAGS = $(MESOS_CPPFLAGS) $(LIBSTORAGE_CPPFLAGS) -Wall -Werror
 
 CXX_PROTOS = isolator/interface.pb.cc isolator/interface.pb.h
 

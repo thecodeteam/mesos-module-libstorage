@@ -13,8 +13,8 @@
     },
 
     "files": [{
-        "includePattern": "isolator/build/(.+)/build/.libs/(.+-.+\.so)",
-        "uploadPattern": "unstable/${SEMVER}/$1/$2"
+        "includePattern": "isolator/(.+-.+\.so)",
+        "uploadPattern": "unstable/${SEMVER}/${MESOSVER}/$1"
     }],
 
     "publish": true

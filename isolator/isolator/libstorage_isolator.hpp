@@ -91,17 +91,9 @@ public:
   //    this call is synchronous, and returns 0 if success
   //    actual call is defined below in DVDCLI_MOUNT_CMD
   // 5. Add entry to hashmap that contains root mountpath indexed by ContainerId
-#if MESOS_VERSION_INT != 0 && MESOS_VERSION_INT < 270
-  virtual process::Future<Option<ContainerPrepareInfo>> prepare(
-    const ContainerID& containerId,
-    const ExecutorInfo& executorInfo,
-    const std::string& directory,
-    const Option<std::string>& user);
-#else
   virtual process::Future<Option<ContainerLaunchInfo>> prepare(
     const ContainerID& containerId,
     const ContainerConfig& containerConfig);
-#endif
 
   // Nothing will be done at task start
   virtual process::Future<Nothing> isolate(

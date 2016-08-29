@@ -1,37 +1,28 @@
-language: c++
+sudo: required
+
+language: python
+
+env:
+  - VER=1.0.0
+
+services:
+  - docker
+
+before_install:
+  - eval $(./set-travis-env.sh)
+  - docker pull emccode/mesos-libstorage-build:${VER}
+
+install:
+  - docker run -ti -v $TRAVIS_BUILD_DIR/isolator/:/isolator emccode/mesos-libstorage-build:${VER} /bin/bash -c  '/usr/bin/make all && cp -p -v /isolator/build/.libs/libmesos_libstorage_isolator-${ISOLATOR_VERSION}.so /isolator/'
+  - docker logs $(docker ps -l -q)
+  - mv $TRAVIS_BUILD_DIR/isolator/libmesos_libstorage_isolator-${VER}.so $TRAVIS_BUILD_DIR/isolator/${SO_FILENAME}
 
 script:
-  - make svn
-  - make boost
-  - make boto
-  - make glog
-  - make protobuf
-  - make picojson
-  - make mesos-0.26.0
-  - make mesos-0.27.2
-  - make mesos-0.28.1
-  - make autoconf
-  - make isolator-0.26.0
-  - make isolator-0.27.2
-  - make isolator-0.28.1
-  - make bintray
+  - shasum $TRAVIS_BUILD_DIR/isolator/${SO_FILENAME}
 
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    - gdb
-    - g++-4.8
-    - libapr1-dev
-    - python-protobuf
-    - libaprutil1-dev
-    - libcurl4-nss-dev
-    - p7zip-full
-
-cache:
-  directories:
-    - /tmp/mesos-ubuntu-12.04-deps/.7zs
+before_deploy:
+  - ls -la $TRAVIS_BUILD_DIR/isolator/
+  - cat bintray-unstable-filtered.json
 
 deploy:
   - provider: bintray
@@ -39,6 +30,3 @@ deploy:
     user: $BINTRAY_USER
     key: $BINTRAY_KEY
     skip_cleanup: true
-    on:
-      all_branches: true
-      condition: $TRAVIS_TAG =~ ^$ && ($TRAVIS_REPO_SLUG = 'emccode/mesos-module-libstorage' || $IGNORE_REPO_SLUG_CONDITION = true) && ($TRAVIS_BRANCH = master || $IGNORE_BRANCH_CONDITION = true)
