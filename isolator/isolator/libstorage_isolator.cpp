@@ -470,17 +470,9 @@ Failure LibstorageIsolator::revertMountlist(
 // there are any problems parsing or mounting even one
 // mount, we want to exit with an error and no new
 // mounted volumes. Goal: make all mounts or none.
-#if MESOS_VERSION_INT != 0 && MESOS_VERSION_INT < 270
-Future<Option<ContainerPrepareInfo>> LibstorageIsolator::prepare(
-  const ContainerID& containerId,
-  const ExecutorInfo& executorInfo,
-  const string& directory,
-  const Option<string>& user)
-#else
 Future<Option<ContainerLaunchInfo>> LibstorageIsolator::prepare(
   const ContainerID& containerId,
   const ContainerConfig& containerConfig)
-#endif
 {
   LOG(INFO) << "Preparing external storage for container: "
             << stringify(containerId);
@@ -489,11 +481,7 @@ Future<Option<ContainerLaunchInfo>> LibstorageIsolator::prepare(
     return Failure("Container has already been prepared");
   }
 
-#if MESOS_VERSION_INT != 0 && MESOS_VERSION_INT >= 280
   const ExecutorInfo& executorInfo = containerConfig.executor_info();
-#elif MESOS_VERSION_INT != 0 && MESOS_VERSION_INT >= 270
-  const ExecutorInfo& executorInfo = containerConfig.executorinfo();
-#endif
 
   // Get things we need from task's environment in ExecutoInfo.
   if (!executorInfo.command().has_environment()) {
@@ -503,15 +491,8 @@ Future<Option<ContainerLaunchInfo>> LibstorageIsolator::prepare(
     return None();
   }
 
-#if MESOS_VERSION_INT != 0 && MESOS_VERSION_INT < 270
-  ContainerPrepareInfo prepareInfo;
-  prepareInfo.set_namespaces(CLONE_NEWNS);
-#else
-  //yes, this should be called launchInfo, but it side step making a lot of
-  //code changes.
-  ContainerLaunchInfo prepareInfo;
-  prepareInfo.set_namespaces(CLONE_NEWNS);
-#endif
+  ContainerLaunchInfo launchInfo;
+  launchInfo.set_namespaces(CLONE_NEWNS);
 
   // We accept <environment-var-name>#, where # can be 1-9, saved in array[#].
   // We also accept <environment-var-name>, saved in array[0].
@@ -729,8 +710,8 @@ Future<Option<ContainerLaunchInfo>> LibstorageIsolator::prepare(
     LOG(INFO) << "queueing mount -n --rbind " << mountPoint
               << " " << containerPath;
 
-    prepareInfo.add_commands()->set_value(
-            "mount -n --rbind " + mountPoint + " " + containerPath);
+    launchInfo.add_pre_exec_commands()->set_value(
+      "mount -n --rbind " + mountPoint + " " + containerPath);
   }
 
   // Create ExternalMountList protobuf message to checkpoint
@@ -742,7 +723,7 @@ Future<Option<ContainerLaunchInfo>> LibstorageIsolator::prepare(
   mesos::internal::slave::state::checkpoint(mountPbFilename,
     inUseMountsProtobuf);
 
-  return prepareInfo;
+  return launchInfo;
 }
 
 Future<ContainerLimitation> LibstorageIsolator::watch(
